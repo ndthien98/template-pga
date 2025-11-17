@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  # Redis Master
+  redis-master:
+    image: redis:7-alpine
+    container_name: redis-master
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-master-data:/data
+      - ./config/redis/master/redis.conf:/etc/redis/redis.conf
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Slave 1
+  redis-slave-1:
+    image: redis:7-alpine
+    container_name: redis-slave-1
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-slave-1-data:/data
+      - ./config/redis/slave/redis.conf:/etc/redis/redis.conf
+    environment:
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT=6379
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Slave 2
+  redis-slave-2:
+    image: redis:7-alpine
+    container_name: redis-slave-2
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-slave-2-data:/data
+      - ./config/redis/slave/redis.conf:/etc/redis/redis.conf
+    environment:
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT=6379
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Slave 3
+  redis-slave-3:
+    image: redis:7-alpine
+    container_name: redis-slave-3
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis-slave-3-data:/data
+      - ./config/redis/slave/redis.conf:/etc/redis/redis.conf
+    environment:
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT=6379
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Sentinel 1
+  redis-sentinel-1:
+    image: redis:7-alpine
+    container_name: redis-sentinel-1
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./config/redis/sentinel/sentinel-1.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+      - redis-slave-1
+      - redis-slave-2
+      - redis-slave-3
+    networks:
+      - redis-network
+
+  # Sentinel 2
+  redis-sentinel-2:
+    image: redis:7-alpine
+    container_name: redis-sentinel-2
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./config/redis/sentinel/sentinel-2.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+      - redis-slave-1
+      - redis-slave-2
+      - redis-slave-3
+    networks:
+      - redis-network
+
+  # Sentinel 3
+  redis-sentinel-3:
+    image: redis:7-alpine
+    container_name: redis-sentinel-3
+    command: redis-sentinel /etc/redis/sentinel.conf
+    ports:
+      - "26381:26379"
+    volumes:
+      - ./config/redis/sentinel/sentinel-3.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+      - redis-slave-1
+      - redis-slave-2
+      - redis-slave-3
+    networks:
+      - redis-network
+
+networks:
+  redis-network:
+    driver: bridge
+
+volumes:
+  redis-master-data:
+  redis-slave-1-data:
+  redis-slave-2-data:
+  redis-slave-3-data:
