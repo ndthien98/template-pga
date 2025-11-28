@@ -1,0 +1,22 @@
+{
+  "name": "kafka-simple-setup",
+  "version": "1.0.0",
+  "description": "Simple Kafka producer and consumer with Docker Compose",
+  "main": "index.js",
+  "scripts": {
+    "producer": "node producer.js",
+    "consumer": "node consumer.js",
+    "install-deps": "npm install"
+  },
+  "keywords": [
+    "kafka",
+    "producer",
+    "consumer",
+    "docker"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  }
+}

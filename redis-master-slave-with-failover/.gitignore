@@ -1,0 +1,23 @@
+# Environment files
+.env
+
+# Backup files
+backups/
+*.rdb
+*.aof
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Sentinel runtime files
+sentinel.conf.*

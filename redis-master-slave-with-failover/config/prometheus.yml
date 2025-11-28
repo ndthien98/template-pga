@@ -1,0 +1,47 @@
+# Prometheus Configuration for Redis Cluster Monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'redis-cluster'
+    environment: 'development'
+
+# Scrape configurations
+scrape_configs:
+  # Redis Master Exporter
+  - job_name: 'redis-master'
+    static_configs:
+      - targets: ['redis-exporter-master:9121']
+        labels:
+          instance: 'redis-master'
+          role: 'master'
+
+  # Redis Slave 1 Exporter
+  - job_name: 'redis-slave-1'
+    static_configs:
+      - targets: ['redis-exporter-slave-1:9121']
+        labels:
+          instance: 'redis-slave-1'
+          role: 'slave'
+
+  # Redis Slave 2 Exporter
+  - job_name: 'redis-slave-2'
+    static_configs:
+      - targets: ['redis-exporter-slave-2:9121']
+        labels:
+          instance: 'redis-slave-2'
+          role: 'slave'
+
+  # Redis Slave 3 Exporter
+  - job_name: 'redis-slave-3'
+    static_configs:
+      - targets: ['redis-exporter-slave-3:9121']
+        labels:
+          instance: 'redis-slave-3'
+          role: 'slave'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

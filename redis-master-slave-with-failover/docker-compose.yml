@@ -1,0 +1,393 @@
+services:
+  # Redis Master
+  redis-master:
+    image: redis:7.2-alpine
+    container_name: redis-master
+    hostname: redis-master
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --protected-mode no
+      --port 6379
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-master-data:/data
+      - ./config/redis-master.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Slave 1
+  redis-slave-1:
+    image: redis:7.2-alpine
+    container_name: redis-slave-1
+    hostname: redis-slave-1
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --protected-mode no
+      --port 6379
+      --slaveof redis-master 6379
+      --slave-read-only yes
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-slave-1-data:/data
+      - ./config/redis-slave.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Slave 2
+  redis-slave-2:
+    image: redis:7.2-alpine
+    container_name: redis-slave-2
+    hostname: redis-slave-2
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --protected-mode no
+      --port 6379
+      --slaveof redis-master 6379
+      --slave-read-only yes
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-slave-2-data:/data
+      - ./config/redis-slave.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Slave 3
+  redis-slave-3:
+    image: redis:7.2-alpine
+    container_name: redis-slave-3
+    hostname: redis-slave-3
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --protected-mode no
+      --port 6379
+      --slaveof redis-master 6379
+      --slave-read-only yes
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis-slave-3-data:/data
+      - ./config/redis-slave.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Sentinel 1
+  redis-sentinel-1:
+    image: redis:7.2-alpine
+    container_name: redis-sentinel-1
+    hostname: redis-sentinel-1
+    command:
+      - sh
+      - -c
+      - |
+        sleep 5
+        cat > /tmp/sentinel.conf <<EOF
+        port 26379
+        dir /data
+        sentinel resolve-hostnames yes
+        sentinel announce-hostnames yes
+        sentinel monitor mymaster redis-master 6379 2
+        sentinel down-after-milliseconds mymaster 5000
+        sentinel failover-timeout mymaster 10000
+        sentinel parallel-syncs mymaster 1
+        loglevel notice
+        protected-mode no
+        sentinel announce-ip redis-sentinel-1
+        sentinel announce-port 26379
+        EOF
+        redis-sentinel /tmp/sentinel.conf
+    ports:
+      - "26379:26379"
+    volumes:
+      - sentinel-1-data:/data
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-slave-1:
+        condition: service_healthy
+      redis-slave-2:
+        condition: service_healthy
+      redis-slave-3:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis Sentinel 2
+  redis-sentinel-2:
+    image: redis:7.2-alpine
+    container_name: redis-sentinel-2
+    hostname: redis-sentinel-2
+    command:
+      - sh
+      - -c
+      - |
+        sleep 5
+        cat > /tmp/sentinel.conf <<EOF
+        port 26379
+        dir /data
+        sentinel resolve-hostnames yes
+        sentinel announce-hostnames yes
+        sentinel monitor mymaster redis-master 6379 2
+        sentinel down-after-milliseconds mymaster 5000
+        sentinel failover-timeout mymaster 10000
+        sentinel parallel-syncs mymaster 1
+        loglevel notice
+        protected-mode no
+        sentinel announce-ip redis-sentinel-2
+        sentinel announce-port 26379
+        EOF
+        redis-sentinel /tmp/sentinel.conf
+    ports:
+      - "26380:26379"
+    volumes:
+      - sentinel-2-data:/data
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-slave-1:
+        condition: service_healthy
+      redis-slave-2:
+        condition: service_healthy
+      redis-slave-3:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis Sentinel 3
+  redis-sentinel-3:
+    image: redis:7.2-alpine
+    container_name: redis-sentinel-3
+    hostname: redis-sentinel-3
+    command:
+      - sh
+      - -c
+      - |
+        sleep 5
+        cat > /tmp/sentinel.conf <<EOF
+        port 26379
+        dir /data
+        sentinel resolve-hostnames yes
+        sentinel announce-hostnames yes
+        sentinel monitor mymaster redis-master 6379 2
+        sentinel down-after-milliseconds mymaster 5000
+        sentinel failover-timeout mymaster 10000
+        sentinel parallel-syncs mymaster 1
+        loglevel notice
+        protected-mode no
+        sentinel announce-ip redis-sentinel-3
+        sentinel announce-port 26379
+        EOF
+        redis-sentinel /tmp/sentinel.conf
+    ports:
+      - "26381:26379"
+    volumes:
+      - sentinel-3-data:/data
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-slave-1:
+        condition: service_healthy
+      redis-slave-2:
+        condition: service_healthy
+      redis-slave-3:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis Exporter for Master
+  redis-exporter-master:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-master
+    command:
+      - '--redis.addr=redis://redis-master:6379'
+      - '--web.listen-address=:9121'
+    ports:
+      - "9121:9121"
+    networks:
+      - redis-network
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis Exporter for Slave 1
+  redis-exporter-slave-1:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-slave-1
+    command:
+      - '--redis.addr=redis://redis-slave-1:6379'
+      - '--web.listen-address=:9121'
+    ports:
+      - "9122:9121"
+    networks:
+      - redis-network
+    depends_on:
+      redis-slave-1:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis Exporter for Slave 2
+  redis-exporter-slave-2:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-slave-2
+    command:
+      - '--redis.addr=redis://redis-slave-2:6379'
+      - '--web.listen-address=:9121'
+    ports:
+      - "9123:9121"
+    networks:
+      - redis-network
+    depends_on:
+      redis-slave-2:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis Exporter for Slave 3
+  redis-exporter-slave-3:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-slave-3
+    command:
+      - '--redis.addr=redis://redis-slave-3:6379'
+      - '--web.listen-address=:9121'
+    ports:
+      - "9124:9121"
+    networks:
+      - redis-network
+    depends_on:
+      redis-slave-3:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: redis-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9092:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - redis-network
+    depends_on:
+      - redis-exporter-master
+      - redis-exporter-slave-1
+      - redis-exporter-slave-2
+      - redis-exporter-slave-3
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: redis-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - redis-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+networks:
+  redis-network:
+    driver: bridge
+    name: redis-network
+
+volumes:
+  redis-master-data:
+    name: redis-master-data
+  redis-slave-1-data:
+    name: redis-slave-1-data
+  redis-slave-2-data:
+    name: redis-slave-2-data
+  redis-slave-3-data:
+    name: redis-slave-3-data
+  sentinel-1-data:
+    name: sentinel-1-data
+  sentinel-2-data:
+    name: sentinel-2-data
+  sentinel-3-data:
+    name: sentinel-3-data
+  prometheus-data:
+    name: redis-prometheus-data
+  grafana-data:
+    name: redis-grafana-data

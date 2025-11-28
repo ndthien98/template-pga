@@ -1,4 +1,5 @@
 {
+  "alwaysThinkingEnabled": false,
   "hooks": {
     "Stop": [
       {
@@ -10,5 +11,18 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(gemini:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker-compose stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker volume rm:*)"
+    ],
+    "deny": [],
+    "ask": []
   }
 }
