@@ -1,4 +1,11 @@
 {
+  "env": {
+    "ENABLE_TOOL_SEARCH": "auto:5"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Bash(chmod:*)",
@@ -45,13 +52,6 @@
       "Bash(git push:*)"
     ]
   },
-  "env": {
-    "ENABLE_TOOL_SEARCH": "auto:5"
-  },
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -84,5 +84,6 @@
         ]
       }
     ]
-  }
+  },
+  "skipDangerousModePermissionPrompt": true
 }
