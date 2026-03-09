@@ -1,11 +1,14 @@
 {
+  "cleanupPeriodDays": 7,
   "env": {
-    "ENABLE_TOOL_SEARCH": "auto:5"
+    "ENABLE_TOOL_SEARCH": "auto:5",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "attribution": {
     "commit": "",
     "pr": ""
   },
+  "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(chmod:*)",
@@ -48,10 +51,9 @@
       "Bash(git push --force:*)",
       "Bash(git reset --hard:*)"
     ],
-    "ask": [
-      "Bash(git push:*)"
-    ]
+    "ask": ["Bash(git push:*)"]
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -69,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "afplay /System/Library/Sounds/Glass.aiff"
+            "command": "afplay ~/.claude/hentai-voice.aiff"
           }
         ]
       }
@@ -85,5 +87,9 @@
       }
     ]
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "teammateMode": "tmux",
+  "preferences": {
+    "tmuxSplitPanes": true
+  }
 }
